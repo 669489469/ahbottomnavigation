@@ -5,10 +5,14 @@ Library to implement the Bottom Navigation component from Material Design guidel
 ## Demo
 <img src="https://raw.githubusercontent.com/aurelhubert/ahbottomnavigation/master/demo1.gif" width="208" height="368" /> <img src="https://raw.githubusercontent.com/aurelhubert/ahbottomnavigation/master/demo2.gif" width="208" height="368" /> <img src="https://raw.githubusercontent.com/aurelhubert/ahbottomnavigation/master/demo3.gif" width="208" height="368" /> <img src="https://raw.githubusercontent.com/aurelhubert/ahbottomnavigation/master/demo4.gif" width="208" height="368" />
 
-## What's new (1.0.1)
-* Bug fixes
-* Notifications
-* Minimum SDK version: 14
+## What's new (2.1.0) - [Changelog](https://github.com/aurelhubert/ahbottomnavigation/blob/master/CHANGELOG.md)
+* Update libraries versions
+* Add enable/disable tab state (with custom color)
+* Add new xml attributes (`colored`, `accentColor`, `inactiveColor`, `disableColor`, `coloredActive`, `coloredInactive`)
+* Add param `notificationAnimationDuration`
+* Update getDrawable method with `AppCompatResources.getDrawable(context, drawableRes);`
+If you use drawable selector and target API < 21, don't forget to add this:
+`AppCompatDelegate.setCompatVectorFromResourcesEnabled(true); `
 
 ## Features
 * Follow the bottom navigation guidelines (https://www.google.com/design/spec/components/bottom-navigation.html)
@@ -17,13 +21,14 @@ Library to implement the Bottom Navigation component from Material Design guidel
 * Add a OnTabSelectedListener to detect tab selection
 * Support icon font color with "setForceTint(true)"
 * Manage notififcations for each item
+* Enable/disable tab state
 
 ## How to?
 
 ### Gradle
 ```groovy
 dependencies {
-    compile 'com.aurelhubert:ahbottomnavigation:1.0.1'
+    compile 'com.aurelhubert:ahbottomnavigation:2.1.0'
 }
 ```
 ### XML
@@ -71,6 +76,9 @@ bottomNavigation.setDefaultBackgroundColor(Color.parseColor("#FEFEFE"));
 // Disable the translation inside the CoordinatorLayout
 bottomNavigation.setBehaviorTranslationEnabled(false);
 
+// Enable the translation of the FloatingActionButton
+bottomNavigation.manageFloatingActionButtonBehavior(floatingActionButton);
+
 // Change colors
 bottomNavigation.setAccentColor(Color.parseColor("#F63D2B"));
 bottomNavigation.setInactiveColor(Color.parseColor("#747474"));
@@ -78,8 +86,16 @@ bottomNavigation.setInactiveColor(Color.parseColor("#747474"));
 // Force to tint the drawable (useful for font with icon for example)
 bottomNavigation.setForceTint(true);
 
-// Force the titles to be displayed (against Material Design guidelines!)
-bottomNavigation.setForceTitlesDisplay(true);
+// Display color under navigation bar (API 21+)
+// Don't forget these lines in your style-v21
+// <item name="android:windowTranslucentNavigation">true</item>
+// <item name="android:fitsSystemWindows">true</item>
+bottomNavigation.setTranslucentNavigationEnabled(true);
+
+// Manage titles
+bottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
+bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
+bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_HIDE);
 
 // Use colored navigation with circle reveal effect
 bottomNavigation.setColored(true);
@@ -91,32 +107,53 @@ bottomNavigation.setCurrentItem(1);
 bottomNavigation.setNotificationBackgroundColor(Color.parseColor("#F63D2B"));
 
 // Add or remove notification for each item
-bottomNavigation.setNotification(4, 1);
-bottomNavigation.setNotification(0, 1);
+bottomNavigation.setNotification("1", 3);
+// OR
+AHNotification notification = new AHNotification.Builder()
+    .setText("1")
+    .setBackgroundColor(ContextCompat.getColor(DemoActivity.this, R.color.color_notification_back))
+    .setTextColor(ContextCompat.getColor(DemoActivity.this, R.color.color_notification_text))
+     .build();
+bottomNavigation.setNotification(notification, 1);
 
-// Set listener
+// Enable / disable item & set disable color
+bottomNavigation.enableItemAtPosition(2);
+bottomNavigation.disableItemAtPosition(2);
+bottomNavigation.setItemDisableColor(Color.parseColor("#3A000000"));
+
+// Set listeners
 bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
 	@Override
-	public void onTabSelected(int position, boolean wasSelected) {
+	public boolean onTabSelected(int position, boolean wasSelected) {
 		// Do something cool here...
+        return true;
+	}
+});
+bottomNavigation.setOnNavigationPositionListener(new AHBottomNavigation.OnNavigationPositionListener() {
+	@Override public void onPositionChange(int y) {
+		// Manage the new y position
 	}
 });
 ```
 
-## TODO
+### With XML menu
+```java
+int[] tabColors = getApplicationContext().getResources().getIntArray(R.array.tab_colors);
+AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
+AHBottomNavigationAdapter navigationAdapter = new AHBottomNavigationAdapter(this, R.menu.bottom_navigation_menu_3);
+navigationAdapter.setupWithBottomNavigation(bottomNavigation, tabColors);
+```
 
-* Add color under the navigation bar.
+## TODO
 * Manage tablet
 
 ## Contributions
-
 Feel free to create issues / pull requests.
 
 ## License
-
 ```
 AHBottomNavigation library for Android
-Copyright (c) 2016 Aurelien Hubert (http://github.com/aurelhubert).
+Copyright (c) 2017 Aurelien Hubert (http://github.com/aurelhubert).
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

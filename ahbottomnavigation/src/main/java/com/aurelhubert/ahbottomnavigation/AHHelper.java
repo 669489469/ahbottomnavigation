@@ -35,7 +35,7 @@ public class AHHelper {
 	public static Drawable getTintDrawable(Drawable drawable, @ColorInt int color, boolean forceTint) {
 		if (forceTint) {
 			drawable.clearColorFilter();
-			drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+			drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
 			drawable.invalidateSelf();
 			return drawable;
 		}
@@ -57,6 +57,26 @@ public class AHHelper {
 				if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
 					ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
 					p.setMargins(p.leftMargin, (int) animatedValue, p.rightMargin, p.bottomMargin);
+					view.requestLayout();
+				}
+			}
+		});
+		animator.start();
+	}
+
+	/**
+	 * Update bottom margin with animation
+	 */
+	public static void updateBottomMargin(final View view, int fromMargin, int toMargin, int duration) {
+		ValueAnimator animator = ValueAnimator.ofFloat(fromMargin, toMargin);
+		animator.setDuration(duration);
+		animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+			@Override
+			public void onAnimationUpdate(ValueAnimator valueAnimator) {
+				float animatedValue = (float) valueAnimator.getAnimatedValue();
+				if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+					ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+					p.setMargins(p.leftMargin, p.topMargin, p.rightMargin, (int) animatedValue);
 					view.requestLayout();
 				}
 			}
@@ -161,6 +181,7 @@ public class AHHelper {
 			public void onAnimationUpdate(ValueAnimator animator) {
 				imageView.setImageDrawable(AHHelper.getTintDrawable(drawable,
 						(Integer) animator.getAnimatedValue(), forceTint));
+				imageView.requestLayout();
 			}
 		});
 		colorAnimation.start();
